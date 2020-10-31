@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  group: one
+  shipto_qb_id: MyString
+  shipto_qb_name: MyString
+  shipto_qb_address_l1: MyString
+  shipto_qb_address_l2: MyString
+  shipto_qb_city: MyString
+  shipto_qb_state: MyString
+  shipto_qb_zip: MyString
+  shipto_qb_country: MyString
+  shipto_qb_contact: MyString
+  shipto_qb_phone_number: MyString
+  time_zone: MyString
+
+two:
+  group: two
+  shipto_qb_id: MyString
+  shipto_qb_name: MyString
+  shipto_qb_address_l1: MyString
+  shipto_qb_address_l2: MyString
+  shipto_qb_city: MyString
+  shipto_qb_state: MyString
+  shipto_qb_zip: MyString
+  shipto_qb_country: MyString
+  shipto_qb_contact: MyString
+  shipto_qb_phone_number: MyString
+  time_zone: MyString

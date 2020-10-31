@@ -1,0 +1,49 @@
+<section class="text-center m-5">
+  <h1 class="text-center">CryoConcepts Content Management System</h1>
+  <h2 class="text-center m-5"> Device Management </h2>
+
+  <div class="container">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card bg-light">
+        <% if user_signed_in? %>
+          <div class="card-title text-center ccs-card-title">
+            Logged as <strong><%= current_user.email %></strong>.              
+          </div>
+          <div class="card-body">
+            <p class="card-text text-center">
+              You can perform the following actions. 
+            </p>
+            <div class="ccs-card-line">
+              <% if current_user.admin? %>
+                <%= link_to "Manage Server", admin_root_path, class: 'btn btn-secondary ccbtn'  %>
+              <% else %>
+                <%= link_to 'View profile', admin_user_path(current_user.id), class: 'btn btn-secondary ccbtn' %>
+              <% end %>
+              <%= link_to 'Edit profile', edit_admin_user_path(current_user.id), class: 'btn btn-secondary ccbtn' %>
+              <%= link_to "Logout", destroy_user_session_path, method: :delete, class: 'btn btn-secondary ccbtn'  %>
+            </div>
+          </div>
+        <% else %>
+          <p></p>
+          <div class=card-title text-center ccs-card-title">
+            Authentication.
+          </div>
+          <div class="card-body">
+            <p class="card-text text-center">
+              To authenticate login using link below. 
+            </p>
+            <div class="ccs-card-auth">
+              <%= link_to "Login", new_user_session_path, class: 'btn btn-secondary ccbtn'  %>
+            </div>
+          </div>
+        <% end %>
+
+          </div>
+        </div>
+      </div>    
+    </div>
+
+  </div>
+
+
+</section>

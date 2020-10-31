@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  token: 
+  user: one
+  expires_at: 2020-05-30 22:58:29
+
+two:
+  token: 
+  user: two
+  expires_at: 2020-05-30 22:58:29

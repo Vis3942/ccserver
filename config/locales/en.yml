@@ -1,0 +1,55 @@
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t 'hello'
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t('hello') %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# The following keys must be escaped otherwise they will not be retrieved by
+# the default I18n backend:
+#
+# true, false, on, off, yes, no
+#
+# Instead, surround them with single quotes.
+#
+# en:
+#   'true': 'foo'
+#
+# To learn more, please read the Rails Internationalization guide
+# available at https://guides.rubyonrails.org/i18n.html.
+
+en:
+  hello: "Hello world"
+  messages:
+    success: Successfully logged in
+    success_logout: Successfully logged out
+    home: Home
+    ping_response: Response to device ping
+    current_info: Most recent ping data in db
+    conn_verify: Request verified
+    update_err_success: Updated successfully
+    welcome_dashboard: Welcome to Cryo Concepts backend server main page
+    use_dashboard: Navigate to tables using the links below
+  errors:
+    login_invalid: Invalid command
+    api_Logged_in: User already logged in (api)
+    web_logged_in: User already logged in (web)
+    not_authenticated: Invalid Authentication
+    logout_invalid_token: Invalid Logout Authentication 
+    no_device: Device not found
+    invalid_device_data: Required params not provided
+    device_db_updated: Device ping data updated in db
+    token_expired: Token has expired, logout, login again for a new token
+    invalid_error_list: Required data for error list not provided
+    invalid_usagestats_list: Required data for usage statistics not found

@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  serial_number: MyString
+  imei_number: MyString
+  location: one
+  service_tag: MyString
+  firmware_version: MyString
+  device_ping_data: MyString
+  device_ping_at: 2020-09-14 23:58:30
+  pay_per_use: false
+  decommissioned: false
+  missing: false
+  from: 2020-09-14 23:58:30
+  to: 2020-09-14 23:58:30
+
+two:
+  serial_number: MyString
+  imei_number: MyString
+  location: two
+  service_tag: MyString
+  firmware_version: MyString
+  device_ping_data: MyString
+  device_ping_at: 2020-09-14 23:58:30
+  pay_per_use: false
+  decommissioned: false
+  missing: false
+  from: 2020-09-14 23:58:30
+  to: 2020-09-14 23:58:30

@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  device: one
+  location: one
+  received_at: 2020-10-14 10:16:43
+  cartridge_tag_id: MyString
+  serum_name: MyString
+  serum_lot_number: MyString
+  treatment_time: MyString
+  datetime_used: MyString
+  board_temperature: MyString
+  min_co2_temperature: MyString
+  max_co2_temperature: MyString
+  average_co2_temperature: MyString
+  tank_tag_id: MyString
+  tank_time_remaining: MyString
+
+two:
+  device: two
+  location: two
+  received_at: 2020-10-14 10:16:43
+  cartridge_tag_id: MyString
+  serum_name: MyString
+  serum_lot_number: MyString
+  treatment_time: MyString
+  datetime_used: MyString
+  board_temperature: MyString
+  min_co2_temperature: MyString
+  max_co2_temperature: MyString
+  average_co2_temperature: MyString
+  tank_tag_id: MyString
+  tank_time_remaining: MyString

@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  device: one
+  location: one
+  occured_at: 2020-10-12 00:23:02
+  error_code: 1
+
+two:
+  device: two
+  location: two
+  occured_at: 2020-10-12 00:23:02
+  error_code: 1
