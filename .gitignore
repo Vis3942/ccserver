@@ -40,3 +40,5 @@
 yarn-debug.log*
 .yarn-integrity
 config/database.yml.nogit
+config/database.yml.deploy
+

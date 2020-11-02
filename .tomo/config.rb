@@ -7,7 +7,7 @@ plugin "puma"
 plugin "rbenv"
 plugin "./plugins/ccserver.rb"
 
-host "deployer@34.207.243.103"
+host "deployer@100.26.243.88"
 
 set application: "ccserver"
 set deploy_to: "/var/www/%{application}"
@@ -31,7 +31,8 @@ set env_vars: {
   RDS_USERNAME: "ccserveruser",
   RDS_PASSWORD: "SiSavakthi^bc1154a28b*Inf",
   RDS_HOSTNAME: "database-1.c5vduxq3dc4y.us-east-1.rds.amazonaws.com",
-  RDS_PORT: "3306"
+  RDS_PORT: "3306",
+  NODE_ENV: "production"
 }
 set linked_dirs: %w[
   log
