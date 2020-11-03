@@ -32,3 +32,4 @@ production:
   host: <%= ENV['RDS_HOSTNAME'] %>
   port: <%= ENV['RDS_PORT'] %>
   ssl_mode: disabled
+  encoding: utf8
