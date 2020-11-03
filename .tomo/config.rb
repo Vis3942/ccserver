@@ -7,7 +7,7 @@ plugin "puma"
 plugin "rbenv"
 plugin "./plugins/ccserver.rb"
 
-host "deployer@100.26.243.88"
+host "deployer@54.145.143.16"
 
 set application: "ccserver"
 set deploy_to: "/var/www/%{application}"
