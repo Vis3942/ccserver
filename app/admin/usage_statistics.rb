@@ -38,7 +38,7 @@ ActiveAdmin.register UsageStatistic do
       if dev_item.nil? 
         link_to usgstat.device_id, admin_device_path(usgstat.device_id)
       else
-        link_to dev_item.service_tag, admin_device_path(usgstat.device_id)
+        link_to [dev_item.service_tag, dev_item.serial_number].join(' : '), admin_device_path(usgstat.device_id)
       end
     end
     column :location_id do |usgstat|

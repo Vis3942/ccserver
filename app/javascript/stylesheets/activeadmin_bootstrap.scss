@@ -185,3 +185,48 @@
     margin-left: 2px;
     margin-right: 2px;
 }
+
+.utcclock {
+    font-weight: bold;
+}
+
+.col {
+    width: fit-content;
+}
+
+.col-from {
+    min-width: 200px;
+}
+
+.col-to {
+    min-width: 200px;
+}
+
+.col-device_ping_at {
+    min-width: 200px;
+}
+
+
+.col-time_zone {
+    min-width: 150px;
+}
+
+.col-location_id {
+    min-width: 150px;
+}
+
+// .col-pay_per_use {
+//     max-width: 75px;
+// }
+
+// .col-pay_per_use_approved {
+//     max-width: 75px;
+// }
+
+// .col-decommissioned {
+//     max-width: 75px;
+// }
+
+// .col-missing {
+//     max-width: 75px;
+// }

@@ -38,7 +38,7 @@ ActiveAdmin.register Error do
       if dev_item.nil? 
         link_to usgstat.device_id, admin_device_path(usgstat.device_id)
       else
-        link_to dev_item.service_tag, admin_device_path(usgstat.device_id)
+        link_to [dev_item.service_tag, dev_item.serial_number].join(' : '), admin_device_path(usgstat.device_id)
       end
     end
     column :location_id do |usgstat|
@@ -51,7 +51,13 @@ ActiveAdmin.register Error do
     end
     column :occured_at
     column :error_code do |errstat|
-      link_to errstat.error_code, admin_error_lists_path
+      #link_to errstat.error_code, admin_error_lists_path
+      err_item = ErrorList.find_by_id(errstat.error_code)
+      if err_item.nil?
+        link_to errstat.error_code, admin_error_lists_path
+      else
+        link_to err_item.description, admin_error_lists_path
+      end
     end
     column :received_at
     actions

@@ -15,5 +15,22 @@ ActiveAdmin.register ErrorList do
   #   permitted
   # end
   
-  actions :all, except: [:destroy, :update, :edit]
+  actions :all, except: [:destroy ]
+
+  form do |f| 
+    f.semantic_errors  *f.object.errors.keys
+    if object.new_record?
+      f.inputs "Error List" do
+        f.input :code
+        f.input :description
+      end
+  else
+      f.inputs "Error List" do
+        f.input :code, :input_html => { :readonly => true }
+        f.input :description
+      end
+    end
+      f.actions
+  end    
+
 end
