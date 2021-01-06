@@ -19,9 +19,10 @@ ActiveAdmin.register_page "Dashboard" do
             li link_to("Users", admin_users_path)
             li link_to("Devices", admin_devices_path)
             li link_to("Locations", admin_locations_path)
-            li link_to("Error List", admin_errors_path)
+            li link_to "Groups", admin_groups_path
+            li link_to("Device Error List", admin_errors_path)
             li link_to("Usage Statistics List", admin_usage_statistics_path)
-            li link_to "Error Descriptions", admin_error_lists_path
+            li link_to "Error Code List", admin_error_lists_path
           end
         end
       end

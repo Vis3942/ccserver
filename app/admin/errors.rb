@@ -30,7 +30,7 @@ ActiveAdmin.register Error do
     Location.all.map { |loc| [loc.shipto_qb_name, loc.id] }
   }
 
-  index do 
+  index :title => "Device Error List" do 
     selectable_column
     id_column
     column :device_id do |usgstat|
@@ -49,7 +49,7 @@ ActiveAdmin.register Error do
         link_to loc_item.shipto_qb_name, admin_location_path(usgstat.location_id)
       end
     end
-    column :occured_at
+    column "Date Occured", :occured_at
     column :error_code do |errstat|
       #link_to errstat.error_code, admin_error_lists_path
       err_item = ErrorList.find_by_id(errstat.error_code)
@@ -59,11 +59,11 @@ ActiveAdmin.register Error do
         link_to err_item.description, admin_error_lists_path
       end
     end
-    column :received_at
+    column "Date Received", :received_at
     actions
   end    
 
-  show do
+  show :title => "Device Error List" do
     attributes_table do
       row :device_id do |usgstat|
         dev_item = Device.find_by_id(usgstat.device_id)

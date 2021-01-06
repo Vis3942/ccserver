@@ -9,13 +9,18 @@ ActiveAdmin.register User do
       #column :current_sign_in_at
       #column :sign_in_count
       column :name
-      column :created_at
-      column :updated_at
+      column :role
+      column "Date Created", :created_at
+      column "Date Updated", :updated_at
       #actions
       actions defaults: false do |user|
         item "View" , admin_user_path(user)
         text_node "&nbsp;".html_safe
         item "Delete" , admin_user_path(user), method: :delete, confirm: I18n.t('active_admin.delete_confirmation')
+        if current_user.admin?
+          text_node "&nbsp;".html_safe
+          item "Edit", edit_admin_user_path(user)
+        end
       end
   end
   
@@ -33,21 +38,25 @@ ActiveAdmin.register User do
         if @resource.id == nil # create new user
           f.input :role, :as => :select, :collection => User.roles
         else
-          f.input :role, :as => :label #:input_html => { :readonly => true }
+          if current_user.admin?
+            f.input :role, :as => :select, :collection => User.roles
+          else
+            f.input :role, :as => :label #:input_html => { :readonly => true }
+          end
         end
       end
       f.actions do
         if @resource.id == nil  #create new user
           f.action :submit
-          f.action :cancel, :url => admin_users_path
+          f.action :cancel, :label => "Cancel", :url => admin_users_path, :wrapper_html => { :class => 'cancel' }
         else
           if @resource.admin?
             f.action :submit
-            f.action :cancel, :url => admin_users_path
+            f.action :cancel, :label => "Cancel", :url => admin_users_path, :wrapper_html => { :class => 'cancel' }
           else 
             # only 2 cases now admin or techsupport so this is techsupport
             f.action :submit
-            f.action :cancel, :url => root_path
+            f.action :cancel, :label => "Cancel", :url => root_path, :wrapper_html => { :class => 'cancel' }
           end
         end
       end

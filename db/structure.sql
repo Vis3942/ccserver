@@ -53,6 +53,7 @@ CREATE TABLE `error_lists` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `description` varchar(255) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
+  `shutdown` enum('no','yes') DEFAULT 'no',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -201,6 +202,7 @@ INSERT INTO `schema_migrations` (version) VALUES
 ('20201022064609'),
 ('20201030062303'),
 ('20201030064630'),
-('20201030064657');
+('20201030064657'),
+('20210106084116');
 
 

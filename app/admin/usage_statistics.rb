@@ -28,6 +28,30 @@ ActiveAdmin.register UsageStatistic do
     Location.all.map { |loc| [loc.shipto_qb_name, loc.id] }
   }
 
+  order_by(:treatment_time) do |order_clause|
+    ["usage_statistics.treatment_time + 0",   order_clause.order].join(' ')
+  end
+
+  order_by(:board_temperature) do |order_clause|
+    ["usage_statistics.board_temperature + 0",   order_clause.order].join(' ')
+  end
+
+  order_by(:min_co2_temperature) do |order_clause|
+    ["usage_statistics.min_co2_temperature + 0.0",   order_clause.order].join(' ')
+  end
+
+  order_by(:max_co2_temperature) do |order_clause|
+    ["usage_statistics.max_co2_temperature + 0.0",   order_clause.order].join(' ')
+  end
+
+  order_by(:average_co2_temperature) do |order_clause|
+    ["usage_statistics.average_co2_temperature + 0",   order_clause.order].join(' ')
+  end
+
+  order_by(:tank_time_remaining) do |order_clause|
+    ["usage_statistics.tank_time_remaining + 0",   order_clause.order].join(' ')
+  end
+
 
   index do
     selectable_column
@@ -61,7 +85,7 @@ ActiveAdmin.register UsageStatistic do
     column :average_co2_temperature
     column :tank_tag_id
     column :tank_time_remaining
-    column :received_at
+    column "Date Received", :received_at
     actions
   end
 

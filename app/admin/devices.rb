@@ -58,7 +58,7 @@ ActiveAdmin.register Device do
     end
     column :firmware_version
     column :device_ping_data
-    column :device_ping_at
+    column "Date Device Ping", :device_ping_at
     column :pay_per_use
     column :pay_per_use_approved
     column :decommissioned
