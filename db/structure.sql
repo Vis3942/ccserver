@@ -38,6 +38,7 @@ CREATE TABLE `devices` (
   `from` datetime DEFAULT NULL,
   `to` datetime DEFAULT NULL,
   `pay_per_use_approved` tinyint(1) DEFAULT NULL,
+  `language_version` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_devices_on_service_tag` (`service_tag`),
   KEY `index_devices_on_location_id` (`location_id`),
@@ -203,6 +204,7 @@ INSERT INTO `schema_migrations` (version) VALUES
 ('20201030062303'),
 ('20201030064630'),
 ('20201030064657'),
-('20210106084116');
+('20210106084116'),
+('20210108070408');
 
 

@@ -5,7 +5,7 @@ ActiveAdmin.register Device do
   #
   # Uncomment all parameters which should be permitted for assignment
   #
-  permit_params :serial_number, :imei_number, :location_id, :service_tag, :firmware_version, :pay_per_use, :pay_per_use_approved, :decommissioned, :missing
+  permit_params :serial_number, :imei_number, :location_id, :service_tag, :firmware_version, :language_version, :pay_per_use, :pay_per_use_approved, :decommissioned, :missing
   #
   # or
   #
@@ -22,6 +22,14 @@ ActiveAdmin.register Device do
     Location.all.map { |loc| [loc.shipto_qb_name, loc.id] }
   }
 
+  order_by(:firmware_version) do |order_clause|
+    ["devices.firmware_version + 0.0",   order_clause.order].join(' ')
+  end
+
+  order_by(:language_version) do |order_clause|
+    ["devices.language_version + 0.0",   order_clause.order].join(' ')
+  end
+
 
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
@@ -34,6 +42,7 @@ ActiveAdmin.register Device do
         :as => :datalist,  
         :collection => Location.all.map { |loc| [loc.ss_display_name(), loc.id].join(', ') }
       f.input :firmware_version 
+      f.input :language_version
       f.input :pay_per_use
       f.input :pay_per_use_approved
       f.input :decommissioned
@@ -57,6 +66,7 @@ ActiveAdmin.register Device do
       end
     end
     column :firmware_version
+    column :language_version
     column :device_ping_data
     column "Date Device Ping", :device_ping_at
     column :pay_per_use
@@ -99,6 +109,7 @@ ActiveAdmin.register Device do
         end
       end
       row :firmware_version
+      row :language_version
       row :device_ping_data
       row :device_ping_at
       row :pay_per_use
