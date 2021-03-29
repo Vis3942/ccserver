@@ -219,6 +219,8 @@ module V1
                 dt_err = DateTime.strptime(item["occured_at"], "%m/%d/%y/ %H:%M")
                 err_line = {location_id: loc_id, device_id: dev_id, occured_at: dt_err, error_code: item["error_code"], received_at: recv_at }
                 to_ins.push(err_line)
+              rescue
+                logger.debug "Invalid error logged in device #{service_tag} occured_at #{item["occured_at"]} "
               end
 
               #to_ins.inspect
