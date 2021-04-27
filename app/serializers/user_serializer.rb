@@ -2,7 +2,7 @@ class UserSerializer < ActiveModel::Serializer
     #attributes :uid, :email, :name
     attributes :email, :name
     attribute :token, if: :show_token?
-  
+    attribute :role, if: :show_token?
     def uid
       object.id
     end
@@ -13,5 +13,9 @@ class UserSerializer < ActiveModel::Serializer
   
     def token
       self.instance_options[:token]
+    end
+
+    def role
+      self.instance_options[:role]
     end
   end

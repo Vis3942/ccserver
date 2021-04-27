@@ -5,7 +5,7 @@ ActiveAdmin.register Device do
   #
   # Uncomment all parameters which should be permitted for assignment
   #
-  permit_params :serial_number, :imei_number, :location_id, :service_tag, :firmware_version, :language_version, :pay_per_use, :pay_per_use_approved, :decommissioned, :missing
+  permit_params :serial_number, :imei_number, :location_id, :service_tag, :firmware_version, :language_packs, :pay_per_use, :pay_per_use_approved, :decommissioned, :missing, :pay_per_use_grace_count
   #
   # or
   #
@@ -26,9 +26,10 @@ ActiveAdmin.register Device do
     ["devices.firmware_version + 0.0",   order_clause.order].join(' ')
   end
 
-  order_by(:language_version) do |order_clause|
-    ["devices.language_version + 0.0",   order_clause.order].join(' ')
-  end
+  # language_version replaced by language_packs (list of languages and versions)
+  # order_by(:language_version) do |order_clause|
+  #   ["devices.language_version + 0.0",   order_clause.order].join(' ')
+  # end
 
 
   form do |f| 
@@ -42,7 +43,7 @@ ActiveAdmin.register Device do
         :as => :datalist,  
         :collection => Location.all.map { |loc| [loc.ss_display_name(), loc.id].join(', ') }
       f.input :firmware_version 
-      f.input :language_version
+      #f.input :language_packs
       f.input :pay_per_use
       f.input :pay_per_use_approved
       f.input :decommissioned
@@ -66,11 +67,48 @@ ActiveAdmin.register Device do
       end
     end
     column :firmware_version
-    column :language_version
-    column :device_ping_data
-    column "Date Device Ping", :device_ping_at
-    column :pay_per_use
-    column :pay_per_use_approved
+    column "Language Versions", :language_packs do |device|
+      if device.language_packs.nil?
+        ""
+      else
+        l_pack_arr = device.language_packs.split(';')
+        if l_pack_arr.length == 0
+          ""
+        elsif l_pack_arr.length == 1
+          device.language_packs
+        else
+          select class: "form-control  ccs-form-control" do
+            l_pack_arr.each { |x|
+              option do
+                x
+              end
+            }
+          end
+        end
+      end
+    end
+    column "Ping Data", :device_ping_data do |device|
+      tmpstr=device.device_ping_data
+      if tmpstr.nil?
+        ""
+      else
+        first_index=tmpstr.index(';')
+        if first_index.nil?
+          tmpstr
+        else
+          second_index=tmpstr.index(';', first_index+1)
+          if second_index.nil?
+            tmpstr
+          else
+            tmpstr.slice(second_index+1, tmpstr.length-1)
+          end
+        end
+      end
+    end
+    column "Ping Date", :device_ping_at
+    column "Pay Per Use (PPU)", :pay_per_use
+    column "PPU Approved", :pay_per_use_approved
+    column "PPU Grace Count", :pay_per_use_grace_count
     column :decommissioned
     column :missing
     column :from

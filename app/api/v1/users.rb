@@ -44,7 +44,7 @@ module V1
         u_token.regenerate_token
         u_token.expires_at = Time.now + MAX_UI_LOGIN_TIME_MINS * 60
         u_token.save
-        serialization = UserSerializer.new(user, {show_token: true, token: u_token.token})
+        serialization = UserSerializer.new(user, {show_token: true, token: u_token.token, role: user.role})
 
         render_success(serialization.as_json)
 

@@ -195,17 +195,16 @@
 }
 
 .col-from {
-    min-width: 200px;
+    min-width: 160px;
 }
 
 .col-to {
-    min-width: 200px;
+    min-width: 160px;
 }
 
 .col-device_ping_at {
     min-width: 200px;
 }
-
 
 .col-time_zone {
     min-width: 150px;
@@ -215,6 +214,17 @@
     min-width: 150px;
 }
 
+.col-pay_per_use_approved {
+    max-width: 130px;
+}
+
+.col-pay_per_use_grace_count {
+    max-width: 130px;
+}
+
+.ccs-form-control {
+    width: fit-content;
+}
 // .col-pay_per_use {
 //     max-width: 75px;
 // }

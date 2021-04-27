@@ -38,7 +38,8 @@ CREATE TABLE `devices` (
   `from` datetime DEFAULT NULL,
   `to` datetime DEFAULT NULL,
   `pay_per_use_approved` tinyint(1) DEFAULT NULL,
-  `language_version` varchar(255) DEFAULT NULL,
+  `language_packs` varchar(255) DEFAULT NULL,
+  `pay_per_use_grace_count` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_devices_on_service_tag` (`service_tag`),
   KEY `index_devices_on_location_id` (`location_id`),
@@ -153,7 +154,7 @@ CREATE TABLE `user_tokens` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `token` varchar(255) DEFAULT NULL,
   `user_id` bigint(20) NOT NULL,
-  `expires_at` time DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
   `created_at` datetime(6) NOT NULL,
   `updated_at` datetime(6) NOT NULL,
   PRIMARY KEY (`id`),
@@ -205,6 +206,8 @@ INSERT INTO `schema_migrations` (version) VALUES
 ('20201030064630'),
 ('20201030064657'),
 ('20210106084116'),
-('20210108070408');
+('20210108070408'),
+('20210403090723'),
+('20210404213819');
 
 

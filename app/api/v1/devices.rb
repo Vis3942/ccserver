@@ -45,8 +45,29 @@ module V1
         #0x0D will be added by the socket server beffore sending it out
         ##TODO: read the other params from other tables
 
+
+        # New Ping Packet format
+        # A;B;C;D;E;F;G;H1;...Hn\r
+        # where 
+        # [0] A = IMEI 
+        # [1] B = serial number
+        # [2] C = stats counts
+        # [3] D = error count
+        # [4] E = firmware version
+        # [5] F = PPU grace treatments left
+        # [6] G = total number of language packs
+        # [7.. 7 + item[6] - 1]Hi  = each language pack name with version number and i = 0...G-1 
+
         device.device_ping_at = Time.now.utc
         device.device_ping_data = ping_data
+        ping_arr = ping_data.split(";").map!(&:strip)
+        device.firmware_version = ping_arr[4]
+        device.pay_per_use_grace_count = ping_arr[5].to_i 
+        if (ping_arr.count > 7)
+          device.language_packs = ping_arr.slice(7, ping_arr.count-1 ).join(';')
+        else
+          device.language_packs = ""
+        end
         device.save
         #TODO: compute response based on other db fields and current time zone               
         resp_str = '0;0;0;0;0;0;0;0' 
