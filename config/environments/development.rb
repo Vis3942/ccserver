@@ -60,6 +60,7 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
+  #config.active_record.migration_error = false
   #config.hosts << "plscentral.com"
   #config.hosts << "www.plscentral.com"
 end

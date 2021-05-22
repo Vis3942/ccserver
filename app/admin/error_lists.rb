@@ -21,6 +21,24 @@ ActiveAdmin.register ErrorList do
 
   #show :title => "Error Code List"
 
+  index do
+    selectable_column
+    id_column
+    column :code
+    column :description
+    column :shutdown
+    actions
+    panel "Tips and Hints", :id => "tips-panel" do
+      disp_str = controller.get_tip_string()
+      num_rows = disp_str.lines.count
+      if num_rows > 10
+        num_rows = 10
+      end
+      textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, readonly: true #"tips here"
+    end
+
+  end
+
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
     if object.new_record?
@@ -29,7 +47,7 @@ ActiveAdmin.register ErrorList do
         f.input :description
         f.input :shutdown, :as => :select, :collection => ErrorList.shutdowns
       end
-  else
+    else
       f.inputs "Error List" do
         f.input :code
         #, :input_html => { :readonly => true }
@@ -39,9 +57,21 @@ ActiveAdmin.register ErrorList do
         else
           f.input :shutdown, :as => :label #:input_html => { :readonly => true }
         end
+      end
     end
-    end
-      f.actions
+    f.actions
   end    
+
+
+  controller do
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("ErrorListsTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+    end
 
 end

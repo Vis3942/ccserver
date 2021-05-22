@@ -1,0 +1,2 @@
+class InvalidPacket < ApplicationRecord
+end

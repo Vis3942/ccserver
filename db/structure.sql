@@ -40,6 +40,7 @@ CREATE TABLE `devices` (
   `pay_per_use_approved` tinyint(1) DEFAULT NULL,
   `language_packs` varchar(255) DEFAULT NULL,
   `pay_per_use_grace_count` int(11) DEFAULT NULL,
+  `archived` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_devices_on_service_tag` (`service_tag`),
   KEY `index_devices_on_location_id` (`location_id`),
@@ -56,7 +57,8 @@ CREATE TABLE `error_lists` (
   `description` varchar(255) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
   `shutdown` enum('no','yes') DEFAULT 'no',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_error_lists_on_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `errors`;
@@ -69,6 +71,7 @@ CREATE TABLE `errors` (
   `occured_at` datetime DEFAULT NULL,
   `error_code` int(11) DEFAULT NULL,
   `received_at` datetime DEFAULT NULL,
+  `archived` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `index_errors_on_device_id` (`device_id`),
   KEY `index_errors_on_location_id` (`location_id`),
@@ -86,6 +89,17 @@ CREATE TABLE `groups` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_groups_on_account_qb_id` (`account_qb_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `invalid_packets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `invalid_packets` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `packet` varchar(255) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=208 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `locations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -120,6 +134,18 @@ CREATE TABLE `schema_migrations` (
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `tips`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tips` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `usage_statistics`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -132,7 +158,7 @@ CREATE TABLE `usage_statistics` (
   `serum_name` varchar(255) DEFAULT NULL,
   `serum_part_number` varchar(255) DEFAULT NULL,
   `treatment_time` varchar(255) DEFAULT NULL,
-  `datetime_used` varchar(255) DEFAULT NULL,
+  `datetime_used` datetime DEFAULT NULL,
   `board_temperature` varchar(255) DEFAULT NULL,
   `min_co2_temperature` varchar(255) DEFAULT NULL,
   `max_co2_temperature` varchar(255) DEFAULT NULL,
@@ -140,6 +166,7 @@ CREATE TABLE `usage_statistics` (
   `tank_tag_id` varchar(255) DEFAULT NULL,
   `tank_time_remaining` varchar(255) DEFAULT NULL,
   `serum_lot_number` varchar(255) DEFAULT NULL,
+  `archived` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `index_usage_statistics_on_device_id` (`device_id`),
   KEY `index_usage_statistics_on_location_id` (`location_id`),
@@ -173,7 +200,7 @@ CREATE TABLE `users` (
   `created_at` datetime(6) NOT NULL,
   `updated_at` datetime(6) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `role` enum('techsupport','admin') DEFAULT NULL,
+  `role` enum('admin','s2','s1','manufacturingtech','logistics','finance') DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_users_on_email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
@@ -208,6 +235,15 @@ INSERT INTO `schema_migrations` (version) VALUES
 ('20210106084116'),
 ('20210108070408'),
 ('20210403090723'),
-('20210404213819');
+('20210404213819'),
+('20210430025727'),
+('20210503072019'),
+('20210507050929'),
+('20210511074348'),
+('20210516202125'),
+('20210516202544'),
+('20210516202720'),
+('20210516202808'),
+('20210517001137');
 
 

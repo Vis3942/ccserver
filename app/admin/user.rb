@@ -1,5 +1,5 @@
 ActiveAdmin.register User do
-    permit_params :email, :password, :password_confirmation, :role, :name
+    permit_params :email, :password, :password_confirmation, :role, :name, :updated_at, :created_at
 
     remove_filter :user_tokens, :superadmin
     index do
@@ -15,13 +15,22 @@ ActiveAdmin.register User do
       #actions
       actions defaults: false do |user|
         item "View" , admin_user_path(user)
-        text_node "&nbsp;".html_safe
-        item "Delete" , admin_user_path(user), method: :delete, confirm: I18n.t('active_admin.delete_confirmation')
         if current_user.admin?
           text_node "&nbsp;".html_safe
+          item "Delete" , admin_user_path(user), method: :delete, data: {confirm: I18n.t('active_admin.delete_confirmation') }
+            text_node "&nbsp;".html_safe
           item "Edit", edit_admin_user_path(user)
         end
       end
+      panel "Tips and Hints", :id => "tips-panel" do
+        disp_str = controller.get_tip_string()
+        num_rows = disp_str.lines.count
+        if num_rows > 10
+          num_rows = 10
+        end
+        textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, readonly: true #"tips here"
+      end
+    
   end
   
     #filter :email
@@ -72,7 +81,7 @@ ActiveAdmin.register User do
 
     # and our Delete Button
     action_item :delete,  only: [ :show ] , if: proc { current_user.admin? } do
-      link_to "#{I18n.t('active_admin.delete')} User", resource_path(resource), method: :delete, confirm: I18n.t('active_admin.delete_confirmation')
+      link_to "#{I18n.t('active_admin.delete')} User", resource_path(resource), method: :delete, data: { confirm: I18n.t('active_admin.delete_confirmation') }
     end
 
     # create_or_edit = Proc.new {
@@ -106,6 +115,7 @@ ActiveAdmin.register User do
       # end
 
       def update
+        authorize :user, :update?
         # update! do |success, failure|
         #   byebug
         #   if current_user.techsupport?
@@ -123,6 +133,20 @@ ActiveAdmin.register User do
         params["user"]["updated_at"]=Time.now
         update! { admin_user_path }
       end
+
+    def show
+      authorize :user, :show?
+    end
+
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("UserTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+  
     end
   
   end

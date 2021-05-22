@@ -14,7 +14,7 @@
               You can perform the following actions. 
             </p>
             <div class="ccs-card-line">
-              <% if current_user.admin? %>
+              <% if current_user.admin? or current_user.s2? or current_user.s1? or current_user.manufacturingtech? or current_user.finance? or current_user.logistics? %>
                 <%= link_to "Manage Server", admin_root_path, class: 'btn btn-secondary ccbtn'  %>
               <% else %>
                 <%= link_to 'View profile', admin_user_path(current_user.id), class: 'btn btn-secondary ccbtn' %>

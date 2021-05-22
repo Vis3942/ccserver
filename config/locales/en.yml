@@ -41,6 +41,7 @@ en:
     update_err_success: Updated successfully
     welcome_dashboard: Welcome to Cryo Concepts backend server main page
     use_dashboard: Navigate to tables using the links below
+    archive: Do you want to archive this item?
   errors:
     login_invalid: Invalid command
     api_Logged_in: User already logged in (api)
@@ -53,3 +54,7 @@ en:
     token_expired: Token has expired, logout, login again for a new token
     invalid_error_list: Required data for error list not provided
     invalid_usagestats_list: Required data for usage statistics not found
+  active_admin:
+    batch_actions:
+      labels:
+        showusagestats: "Show Usage Statistics"

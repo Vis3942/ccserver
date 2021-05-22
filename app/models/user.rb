@@ -1,8 +1,14 @@
 class User < ApplicationRecord
-  
+
+  #     techsupport: "techsupport",
+
   enum role: {
-    techsupport: "techsupport",
-    admin: "admin" }	
+    admin: "admin",
+    s2: "s2",
+    s1: "s1",
+    manufacturingtech: "manufacturingtech",
+    logistics: "logistics",
+    finance: "finance" }	
 	
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable

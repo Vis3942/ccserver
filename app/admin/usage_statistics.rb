@@ -20,6 +20,8 @@ ActiveAdmin.register UsageStatistic do
   #actions :all, except: [:new]
 
   preserve_default_filters!
+  remove_filter :archived
+
   filter :device, collection: -> {
     Device.all.map { |dev| [dev.service_tag, dev.id] }
   }
@@ -56,15 +58,15 @@ ActiveAdmin.register UsageStatistic do
   index do
     selectable_column
     id_column
-    #column :device_id
-    column :device_id do |usgstat|
-      dev_item = Device.find_by_id(usgstat.device_id)
-      if dev_item.nil? 
-        link_to usgstat.device_id, admin_device_path(usgstat.device_id)
-      else
-        link_to [dev_item.service_tag, dev_item.serial_number].join(' : '), admin_device_path(usgstat.device_id)
-      end
-    end
+    column :device_id
+    #column :device_id do |usgstat|
+    #  dev_item = Device.find_by_id(usgstat.device_id)
+    #  if dev_item.nil? 
+    #    link_to usgstat.device_id, admin_device_path(usgstat.device_id)
+    #  else
+    #    link_to [dev_item.service_tag, dev_item.serial_number].join(' : '), admin_device_path(usgstat.device_id)
+    #  end
+    #end
     column :location_id do |usgstat|
       loc_item = Location.find_by_id(usgstat.location_id)
       if loc_item.nil?
@@ -87,6 +89,14 @@ ActiveAdmin.register UsageStatistic do
     column :tank_time_remaining
     column "Date Received", :received_at
     actions
+    panel "Tips and Hints", :id => "tips-panel" do
+      disp_str = controller.get_tip_string()
+      num_rows = disp_str.lines.count
+      if num_rows > 10
+        num_rows = 10
+      end
+      textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, readonly: true #"tips here"
+    end
   end
 
   show do
@@ -124,6 +134,33 @@ ActiveAdmin.register UsageStatistic do
   
     end
   
+  controller do
+    def scoped_collection
+      if !params["q"].nil?
+        if params["q"]["device_id"].nil?
+          end_of_association_chain
+        else
+          end_of_association_chain.where(device_id: params["q"]["device_id"])
+        end
+      else
+        end_of_association_chain
+      end
+      #end_of_association_chain
+    end
 
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("UsaageStatisticsTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+  
+    def scoped_collection
+      end_of_association_chain.where(archived: false)
+    end
+    
+  end
 
 end

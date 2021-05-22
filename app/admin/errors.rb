@@ -22,6 +22,8 @@ ActiveAdmin.register Error do
 
 
   preserve_default_filters!
+  remove_filter :archived
+
   filter :device, collection: -> {
     Device.all.map { |dev| [dev.service_tag, dev.id] }
   }
@@ -52,15 +54,24 @@ ActiveAdmin.register Error do
     column "Date Occured", :occured_at
     column :error_code do |errstat|
       #link_to errstat.error_code, admin_error_lists_path
-      err_item = ErrorList.find_by_id(errstat.error_code)
+      err_item = ErrorList.find_by_code(errstat.error_code)
       if err_item.nil?
         link_to errstat.error_code, admin_error_lists_path
       else
-        link_to err_item.description, admin_error_lists_path
+        link_to errstat.error_code, admin_error_list_path(err_item.id)
       end
     end
     column "Date Received", :received_at
     actions
+    panel "Tips and Hints", :id => "tips-panel" do
+      disp_str = controller.get_tip_string()
+      num_rows = disp_str.lines.count
+      if num_rows > 10
+        num_rows = 10
+      end
+      textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, readonly: true #"tips here"
+    end
+
   end    
 
   show :title => "Device Error List" do
@@ -85,6 +96,24 @@ ActiveAdmin.register Error do
       row :error_code
       row :received_at
     end
+
+  end
+
+
+  controller do
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("ErrorTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+
+    def scoped_collection
+      end_of_association_chain.where(archived: false)
+    end
+
 
   end
 

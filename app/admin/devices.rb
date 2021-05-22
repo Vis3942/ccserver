@@ -17,6 +17,7 @@ ActiveAdmin.register Device do
   # end
 
   preserve_default_filters!
+  remove_filter :archived
 
   filter :location, collection: -> {
     Location.all.map { |loc| [loc.shipto_qb_name, loc.id] }
@@ -35,19 +36,42 @@ ActiveAdmin.register Device do
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
     f.inputs "Devices" do
-      f.input :serial_number
-      f.input :imei_number
-      f.input :service_tag
-      f.input :location_id, :input_html => { :value => !f.object.location_id.nil? ? [Location.find_by_id(f.object.location_id).ss_display_name(), f.object.location_id].join(', ')  : "" , 
-            :maxlength => nil  } ,
-        :as => :datalist,  
-        :collection => Location.all.map { |loc| [loc.ss_display_name(), loc.id].join(', ') }
-      f.input :firmware_version 
-      #f.input :language_packs
-      f.input :pay_per_use
-      f.input :pay_per_use_approved
-      f.input :decommissioned
-      f.input :missing
+      if current_user.admin? or current_user.manufacturingtech?
+        f.input :serial_number
+        f.input :imei_number
+        f.input :service_tag
+      else # for s2, s1,  logistics, finance
+        f.input :serial_number, :input_html => { :disabled => true }
+        f.input :imei_number, :input_html => { :disabled => true }
+        f.input :service_tag, :input_html => { :disabled => true }
+      end
+      if current_user.admin? or current_user.logistics? or current_user.finance?
+        f.input :location_id, :input_html => { :value => !f.object.location_id.nil? ? [Location.find_by_id(f.object.location_id).ss_display_name(), f.object.location_id].join(', ')  : "" , 
+              :maxlength => nil  } ,
+          :as => :datalist,  
+          :collection => Location.all.map { |loc| [loc.ss_display_name(), loc.id].join(', ') }
+      else
+        f.input :location_id, :input_html => { :value => !f.object.location_id.nil? ? [Location.find_by_id(f.object.location_id).ss_display_name(), f.object.location_id].join(', ')  : "" , 
+              :maxlength => nil, :disabled => true  } ,
+          :as => :datalist,  
+          :collection => Location.all.map { |loc| [loc.ss_display_name(), loc.id].join(', ') }
+      end
+      f.input :firmware_version, :input_html => { :disabled => true }
+        #f.input :language_packs
+      if current_user.admin? or current_user.logistics? or current_user.finance? 
+        f.input :pay_per_use
+        f.input :pay_per_use_approved
+      else
+        f.input :pay_per_use, :input_html => { :disabled => true }
+        f.input :pay_per_use_approved, :input_html => { :disabled => true }        
+      end
+      if current_user.admin? 
+        f.input :decommissioned
+        f.input :missing
+      else
+          f.input :decommissioned, :input_html => { :disabled => true }
+          f.input :missing, :input_html => { :disabled => true }
+      end
     end
       f.actions
   end    
@@ -117,17 +141,31 @@ ActiveAdmin.register Device do
     actions defaults: false do |device|
       if device.to.nil? 
         item "View" , admin_device_path(device)
-        text_node "&nbsp;".html_safe
-        item "Edit", edit_admin_device_path(device)
-        text_node "&nbsp;".html_safe
-        item "Delete" , admin_device_path(device), method: :delete, confirm: I18n.t('active_admin.delete_confirmation')
+        if current_user.admin? or current_user.logistics? or current_user.finance?
+          text_node "&nbsp;".html_safe
+          item "Edit", edit_admin_device_path(device)
+        end
+        if current_user.admin?
+          text_node "&nbsp;".html_safe
+          item "Archive" , admin_device_path(device), method: :delete, data: {confirm: I18n.t('messages.archive') }
+        end
       else
         item "View" , admin_device_path(device)
         text_node "&nbsp;".html_safe
-        text_node "Edit"
-        text_node "&nbsp;".html_safe
-        item "Delete" , admin_device_path(device), method: :delete, confirm: I18n.t('active_admin.delete_confirmation')
+        if current_user.admin?
+          text_node "Edit"
+          text_node "&nbsp;".html_safe
+          item "Archive" , admin_device_path(device), method: :delete, data: {confirm: I18n.t('messages.archive') }
+        end
       end
+    end
+    panel "Tips and Hints", :id => "tips-panel" do
+      disp_str = controller.get_tip_string()
+      num_rows = disp_str.lines.count
+      if num_rows > 10
+        num_rows = 10
+      end
+      textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, disabled: true #"tips here"
     end
 
 
@@ -201,8 +239,49 @@ ActiveAdmin.register Device do
 
       end
     end
-      
+
+    def destroy
+      #byebug
+      # changing the functionality "delete" action archives the item
+      # archival corresponds to setting "archieved" field to true
+      device_id = params["id"]
+      db_dev = Device.find_by_id(device_id)
+      if !db_dev.nil?
+        db_dev.archived = true
+        db_dev.save
+        UsageStatistic.where(device_id: device_id).update_all("archived = true")
+        Error.where(device_id: device_id).update_all("archived = true")
+      end
+      redirect_to(request.referrer || root_path) 
+    end
+
+    def scoped_collection
+      #end_of_association_chain.where(service_tag: "0Z0Z0")
+      end_of_association_chain.where(archived: false)
+    end
+
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("DeviceTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+
 
   end
+
+  batch_action :destroy, false
+
+  batch_action  "show usage stats" do |ids|
+    # print ids.inspect
+    # print "selected parameters"
+    # print params["collection_selection"]
+    # print "-----xxxxxxx------xxxx----------"
+    # redirect_to admin_usage_statistics_path(q: {device_id: 4})
+    redirect_to admin_usage_statistics_path(q: {device_id: ids.map{|x| x.to_i} })
+  end
+  
 
 end

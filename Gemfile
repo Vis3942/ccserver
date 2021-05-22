@@ -67,3 +67,5 @@ gem 'grape-swagger'
 #gem 'ruby-debug-ide'
 
 #gem 'bootstrap-sass'
+
+gem "pundit"

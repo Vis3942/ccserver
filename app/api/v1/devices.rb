@@ -298,11 +298,16 @@ module V1
               to_ins = []
               recv_at = Time.now.utc
               usagestats_list.each do |item|
+                begin
+                  dt_us = DateTime.strptime(item["datetime_used"], "%m/%d/%y/ %H:%M")
+                rescue
+                  dt_us = DateTime.new(1970,1,1)
+                end
                 usagestats_line = {location_id: loc_id, device_id: dev_id, received_at: recv_at,
                   cartridge_tag_id: item["cartridge_tag_id"], serum_name: item["serum_name"], 
                   serum_part_number: item["serum_part_number"], serum_lot_number: item["serum_lot_number"], 
                   treatment_time: item["treatment_time"], 
-                  datetime_used: item["datetime_used"], board_temperature: item["board_temperature"], 
+                  datetime_used: dt_us, board_temperature: item["board_temperature"], 
                   min_co2_temperature: item["min_co2_temperature"], max_co2_temperature: item["max_co2_temperature"], 
                   average_co2_temperature: item["average_co2_temperature"], tank_tag_id: item["tank_tag_id"], 
                   tank_time_remaining: item["tank_time_remaining"] }
@@ -322,7 +327,42 @@ module V1
               end
  
             end
-            
+
+            desc 'invalid-ping: {invalid_ping_data} invalid ping packet received', http_codes: [
+              { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
+              { code: RESPONSE_CODE[:bad_request], message: I18n.t('messages.failed') }
+              ]
+              params do
+                  requires :invalid_ping_data, type: String, desc: 'invalid ping packet received'
+              end
+  
+              post "invalid-ping" do
+                  invalid_packet = params[:invalid_ping_data]
+          
+                  if !headers["Host"].starts_with?('127.0.0.1')
+                    render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+                  end
+  
+                  
+                  packet = InvalidPacket.where(packet: invalid_packet).first
+                  if packet.nil?
+                    tpacket = InvalidPacket.create(params[:invalid_packet])
+                    tpacket.packet = invalid_packet
+                    if !tpacket.save
+                      render_error(RESPONSE_CODE[:bad_request], I18n.t('messages.failed'), meta = {response: ""})
+                      return
+                    end
+                  else
+                    packet.updated_at = Time.now.utc
+                    #packet.packet = invalid_packet
+                    packet.save
+                  end
+
+  
+                  serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: packet.id.to_s})
+                  render_success_connverify(serialization.as_json)
+              end
+              
     end
   end
 end

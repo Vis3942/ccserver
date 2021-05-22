@@ -17,6 +17,34 @@ ActiveAdmin.register Location do
 
   permit_params :group_id, :shipto_qb_id, :shipto_qb_name, :shipto_qb_address_l1, :shipto_qb_address_l2, :shipto_qb_city, :shipto_qb_state, :shipto_qb_zip, :shipto_qb_country, :shipto_qb_contact, :shipto_qb_phone_number, :time_zone
 
+
+  index do
+    selectable_column
+    id_column
+    column :group_id
+    column :shipto_qb_id
+    column :shipto_qb_name
+    column :shipto_qb_address_l1
+    column :shipto_qb_address_l2
+    column :shipto_qb_city
+    column :shipto_qb_state
+    column :shipto_qb_zip
+    column :shipto_qb_country
+    column :shipto_qb_contact
+    column :shipto_qb_phone_number
+    column :time_zone
+    actions
+    panel "Tips and Hints", :id => "tips-panel" do
+      disp_str = controller.get_tip_string()
+      num_rows = disp_str.lines.count
+      if num_rows > 10
+        num_rows = 10
+      end
+      textarea  disp_str,  style: "width: 100%; max-width: 100%;", rows: num_rows, readonly: true #"tips here"
+    end
+
+  end
+
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
 
@@ -52,6 +80,17 @@ ActiveAdmin.register Location do
     #   build_resource
     #   index!
     # end
+
+    def get_tip_string
+      tmp_tip = Tip.find_by_name("LocationTips")
+      if tmp_tip.nil?
+        "tips not defined"
+      else
+        tmp_tip.comment
+      end
+    end
+
+
   end
   
 end
