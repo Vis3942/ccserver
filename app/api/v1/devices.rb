@@ -7,15 +7,18 @@ module V1
       desc 'ping: {serial_number, data_str} update Devices table and return response', http_codes: [
         { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
         { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
-        ]
-
+      ]
       params do
-          requires :serial_number, type: String, desc: 'device serial number'
-          requires :imei_number, type: String, desc: 'device imei number'
-          requires :ping_data, type: String, desc: 'device sent ping data'
+        requires :serial_number, type: String, desc: 'device serial number'
+        requires :imei_number, type: String, desc: 'device imei number'
+        requires :ping_data, type: String, desc: 'device sent ping data'
       end
 
       post "ping" do
+        if !headers["Host"].starts_with?('127.0.0.1')
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
         serial_number = params[:serial_number]
         imei_number = params[:imei_number]
         ping_data = params[:ping_data]
@@ -85,283 +88,288 @@ module V1
       end
 
 
-        desc 'get-device: {service_tag, email} ui tech support requesting info about device', http_codes: [
+      desc 'get-device: {service_tag, email} ui tech support requesting info about device', http_codes: [
+        { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
+        { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
+      ]
+      params do
+        requires :service_tag, type: String, desc: 'device service tag'
+        requires :email, type: String, desc: 'user request e-mail'
+      end
+
+      post "get-device" do
+        if !headers["Host"].starts_with?('127.0.0.1')
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        service_tag = params[:service_tag]
+        email = params[:email]
+
+        if service_tag.nil? or email.nil? 
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_device_data', meta = {response: ""}))
+          return
+        end
+
+        #authenticate user and source
+        if headers["Authorization"].nil?
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        #byebug
+        hdrtoken = headers["Authorization"]
+        utoken = UserToken.where(token: hdrtoken )
+        if utoken.nil? or utoken.records.size == 0
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        #has token expired: allow upto 1 hour
+        #TODO: check if token has expired if yes sent token expired errors.token_expired
+
+        #does email mataches token
+        user4token = User.find_by_id(utoken.records[0].user_id)
+        if user4token.nil? or user4token.email != email
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        #locate device
+        device = Device.where(service_tag: service_tag, to: nil).first
+        if device.nil?
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+          return
+        end
+
+        #device.device_ping_at = Time.now.utc
+        #device.device_ping_data = ping_data
+        #device.save
+        serialization = DeviceinfoSerializer.new(nil, {ping_data: device.device_ping_data, updated_at: device.device_ping_at, response: ""})
+        render_success_devinfo(serialization.as_json)
+      end
+
+      desc 'connect-verify: {service_tag, email} ui tech support requesting connect', http_codes: [
+        { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
+        { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
+        ]
+      params do
+        requires :service_tag, type: String, desc: 'device service tag'
+        requires :email, type: String, desc: 'user request e-mail'
+      end
+
+      post "connect-verify" do
+        if !headers["Host"].starts_with?('127.0.0.1')
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        service_tag = params[:service_tag]
+        email = params[:email]
+
+        if service_tag.nil? or email.nil? 
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_device_data', meta = {response: ""}))
+          return
+        end
+
+        #authenticate user and source
+        if headers["Authorization"].nil?
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        hdrtoken = headers["Authorization"]
+        utoken = UserToken.where(token: hdrtoken )
+        if utoken.nil? or utoken.records.size == 0
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        #has token expired: allow upto 1 hour
+        #TODO: check if token has expired if yes sent token expired errors.token_expired
+
+        #does email mataches token
+        user4token = User.find_by_id(utoken.records[0].user_id)
+        if user4token.nil? or user4token.email != email
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+        end
+
+        #locate device
+        device = Device.where(service_tag: service_tag, to: nil).first
+        if device.nil?
+          render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+          return
+        end
+
+        serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
+        render_success_connverify(serialization.as_json)
+      end
+
+      desc 'update-device-errors: {device, errors[]} uploading error data from device', http_codes: [
           { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
           { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
-          ]
-          params do
-              requires :service_tag, type: String, desc: 'device service tag'
-              requires :email, type: String, desc: 'user request e-mail'
+        ]
+        params do
+          requires :device, type: String, desc: 'device service tag'
+          requires :error_list, type: Array[JSON], desc: 'array of error items'
+        end
+
+        post "update-device-errors" do
+          if !headers["Host"].starts_with?('127.0.0.1')
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
           end
 
-          post "get-device" do
-              service_tag = params[:service_tag]
-              email = params[:email]
-      
-              if service_tag.nil? or email.nil? 
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_device_data', meta = {response: ""}))
-                return
-              end
-      
-              #authenticate user and source
-              if headers["Authorization"].nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-              end
-
-              #byebug
-              hdrtoken = headers["Authorization"]
-              utoken = UserToken.where(token: hdrtoken )
-              if utoken.nil? or utoken.records.size == 0
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-              end
-
-              #has token expired: allow upto 1 hour
-              #TODO: check if token has expired if yes sent token expired errors.token_expired
-
-              #does email mataches token
-              user4token = User.find_by_id(utoken.records[0].user_id)
-              if user4token.nil? or user4token.email != email
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-              end
-
-              if !headers["Host"].starts_with?('127.0.0.1')
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-              end
-
-
-              #locate device
-              device = Device.where(service_tag: service_tag, to: nil).first
-              if device.nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                return
-              end
-
-              #device.device_ping_at = Time.now.utc
-              #device.device_ping_data = ping_data
-              #device.save
-              serialization = DeviceinfoSerializer.new(nil, {ping_data: device.device_ping_data, updated_at: device.device_ping_at, response: ""})
-              render_success_devinfo(serialization.as_json)
-          end
-
-          desc 'connect-verify: {service_tag, email} ui tech support requesting connect', http_codes: [
-            { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
-            { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
-            ]
-            params do
-                requires :service_tag, type: String, desc: 'device service tag'
-                requires :email, type: String, desc: 'user request e-mail'
-            end
-
-            post "connect-verify" do
-                service_tag = params[:service_tag]
-                email = params[:email]
-        
-                if service_tag.nil? or email.nil? 
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_device_data', meta = {response: ""}))
-                  return
-                end
-        
-                #authenticate user and source
-                if headers["Authorization"].nil?
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-                end
-
-                hdrtoken = headers["Authorization"]
-                utoken = UserToken.where(token: hdrtoken )
-                if utoken.nil? or utoken.records.size == 0
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-                end
-
-                #has token expired: allow upto 1 hour
-                #TODO: check if token has expired if yes sent token expired errors.token_expired
-
-                #does email mataches token
-                user4token = User.find_by_id(utoken.records[0].user_id)
-                if user4token.nil? or user4token.email != email
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-                end
-
-                if !headers["Host"].starts_with?('127.0.0.1')
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-                end
-
-
-                #locate device
-                device = Device.where(service_tag: service_tag, to: nil).first
-                if device.nil?
-                  render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                  return
-                end
-
-                serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
-                render_success_connverify(serialization.as_json)
-            end
-
-          desc 'update-device-errors: {device, errors[]} uploading error data from device', http_codes: [
-              { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
-              { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
-            ]
-            params do
-              requires :device, type: String, desc: 'device service tag'
-              requires :error_list, type: Array[JSON], desc: 'array of error items'
-            end
-      
-      
-            post "update-device-errors" do
-              #puts params.inspect
-              service_tag = params[:device]
-              err_list = params[:error_list]
-      
-              if service_tag.nil? or err_list.nil? or err_list.length == 0
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_error_list', meta = {response: "false"}))
-                return
-              end
-      
-              #locate device
-              device = Device.where(service_tag: service_tag, to: nil).first
-              if device.nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                return
-              end
-              
-              #get location_id
-              dev_id = device.id
-              loc_id = device.location_id
-              if loc_id.nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                return
-              end
-      
-              #todo: update error table from list and return "true" for response
-              
-              to_ins = []
-              recv_at = Time.now.utc
-              err_list.each do |item|
-                dt_err = DateTime.strptime(item["occured_at"], "%m/%d/%y/ %H:%M")
-                err_line = {location_id: loc_id, device_id: dev_id, occured_at: dt_err, error_code: item["error_code"], received_at: recv_at }
-                to_ins.push(err_line)
-              rescue
-                logger.debug "Invalid error logged in device #{service_tag} occured_at #{item["occured_at"]} "
-              end
-
-              #to_ins.inspect
-              curr_count = Error.count
-              result = Error.insert_all(to_ins)
-              after_count = Error.count
-              if curr_count + to_ins.length == after_count
-                serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
-                render_success_update_errlist(serialization.as_json)
-              else
-                err_serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "false"})
-                render_success_update_errlist(err_serialization.as_json)
-              end
- 
-            end
-
-            desc 'update-device-usagestats: {device, usagestats[]} uploading usage stats from device', http_codes: [
-              { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
-              { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
-            ]
-            params do
-              requires :device, type: String, desc: 'device service tag'
-              requires :usagestats_list, type: Array[JSON], desc: 'array of usage statistics'
-            end
-      
-      
-            post "update-device-usagestats" do
-              #puts params.inspect
-              service_tag = params[:device]
-              usagestats_list = params[:usagestats_list]
-      
-              if service_tag.nil? or usagestats_list.nil? or usagestats_list.length == 0
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_usagestats_list', meta = {response: "false"}))
-                return
-              end
-      
-              #locate device
-              device = Device.where(service_tag: service_tag, to: nil).first
-              if device.nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                return
-              end
-              
-              #get location_id
-              dev_id = device.id
-              loc_id = device.location_id
-              if loc_id.nil?
-                render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
-                return
-              end
-      
-              #todo: update UsageStatistics table from list and return "true" for response
-              
-              to_ins = []
-              recv_at = Time.now.utc
-              usagestats_list.each do |item|
-                begin
-                  dt_us = DateTime.strptime(item["datetime_used"], "%m/%d/%y/ %H:%M")
-                rescue
-                  dt_us = DateTime.new(1970,1,1)
-                end
-                usagestats_line = {location_id: loc_id, device_id: dev_id, received_at: recv_at,
-                  cartridge_tag_id: item["cartridge_tag_id"], serum_name: item["serum_name"], 
-                  serum_part_number: item["serum_part_number"], serum_lot_number: item["serum_lot_number"], 
-                  treatment_time: item["treatment_time"], 
-                  datetime_used: dt_us, board_temperature: item["board_temperature"], 
-                  min_co2_temperature: item["min_co2_temperature"], max_co2_temperature: item["max_co2_temperature"], 
-                  average_co2_temperature: item["average_co2_temperature"], tank_tag_id: item["tank_tag_id"], 
-                  tank_time_remaining: item["tank_time_remaining"] }
-                to_ins.push(usagestats_line)
-              end
-
-              #to_ins.inspect
-              curr_count = UsageStatistic.count
-              result = UsageStatistic.insert_all(to_ins)
-              after_count = UsageStatistic.count
-              if curr_count + to_ins.length == after_count
-                serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
-                render_success_update_errlist(serialization.as_json)
-              else
-                err_serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "false"})
-                render_success_update_errlist(err_serialization.as_json)
-              end
- 
-            end
-
-            desc 'invalid-ping: {invalid_ping_data} invalid ping packet received', http_codes: [
-              { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
-              { code: RESPONSE_CODE[:bad_request], message: I18n.t('messages.failed') }
-              ]
-              params do
-                  requires :invalid_ping_data, type: String, desc: 'invalid ping packet received'
-              end
+          #puts params.inspect
+          service_tag = params[:device]
+          err_list = params[:error_list]
   
-              post "invalid-ping" do
-                  invalid_packet = params[:invalid_ping_data]
+          if service_tag.nil? or err_list.nil? or err_list.length == 0
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_error_list', meta = {response: "false"}))
+            return
+          end
+  
+          #locate device
+          device = Device.where(service_tag: service_tag, to: nil).first
+          if device.nil?
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+            return
+          end
           
-                  if !headers["Host"].starts_with?('127.0.0.1')
-                    render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
-                  end
+          #get location_id
+          dev_id = device.id
+          loc_id = device.location_id
+          if loc_id.nil?
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+            return
+          end
   
-                  
-                  packet = InvalidPacket.where(packet: invalid_packet).first
-                  if packet.nil?
-                    tpacket = InvalidPacket.create(params[:invalid_packet])
-                    tpacket.packet = invalid_packet
-                    if !tpacket.save
-                      render_error(RESPONSE_CODE[:bad_request], I18n.t('messages.failed'), meta = {response: ""})
-                      return
-                    end
-                  else
-                    packet.updated_at = Time.now.utc
-                    #packet.packet = invalid_packet
-                    packet.save
-                  end
+          #todo: update error table from list and return "true" for response
+          
+          to_ins = []
+          recv_at = Time.now.utc
+          err_list.each do |item|
+            dt_err = DateTime.strptime(item["occured_at"], "%m/%d/%y/ %H:%M")
+            err_line = {location_id: loc_id, device_id: dev_id, occured_at: dt_err, error_code: item["error_code"], received_at: recv_at }
+            to_ins.push(err_line)
+          rescue
+            logger.debug "Invalid error logged in device #{service_tag} occured_at #{item["occured_at"]} "
+          end
 
+          #to_ins.inspect
+          curr_count = Error.count
+          result = Error.insert_all(to_ins)
+          after_count = Error.count
+          if curr_count + to_ins.length == after_count
+            serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
+            render_success_update_errlist(serialization.as_json)
+          else
+            err_serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "false"})
+            render_success_update_errlist(err_serialization.as_json)
+          end
+
+        end
+
+        desc 'update-device-usagestats: {device, usagestats[]} uploading usage stats from device', http_codes: [
+          { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
+          { code: RESPONSE_CODE[:bad_request], message: I18n.t('errors.no_device') }
+        ]
+        params do
+          requires :device, type: String, desc: 'device service tag'
+          requires :usagestats_list, type: Array[JSON], desc: 'array of usage statistics'
+        end
+
+        post "update-device-usagestats" do
+          if !headers["Host"].starts_with?('127.0.0.1')
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+          end
+
+          #puts params.inspect
+          service_tag = params[:device]
+          usagestats_list = params[:usagestats_list]
   
-                  serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: packet.id.to_s})
-                  render_success_connverify(serialization.as_json)
-              end
+          if service_tag.nil? or usagestats_list.nil? or usagestats_list.length == 0
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.invalid_usagestats_list', meta = {response: "false"}))
+            return
+          end
+  
+          #locate device
+          device = Device.where(service_tag: service_tag, to: nil).first
+          if device.nil?
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+            return
+          end
+          
+          #get location_id
+          dev_id = device.id
+          loc_id = device.location_id
+          if loc_id.nil?
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.no_device'), meta = {response: ""})
+            return
+          end
+  
+          #todo: update UsageStatistics table from list and return "true" for response
+          
+          to_ins = []
+          recv_at = Time.now.utc
+          usagestats_list.each do |item|
+            begin
+              dt_us = DateTime.strptime(item["datetime_used"], "%m/%d/%y/ %H:%M")
+            rescue
+              dt_us = DateTime.new(1970,1,1)
+            end
+            usagestats_line = {location_id: loc_id, device_id: dev_id, received_at: recv_at,
+              cartridge_tag_id: item["cartridge_tag_id"], serum_name: item["serum_name"], 
+              serum_part_number: item["serum_part_number"], serum_lot_number: item["serum_lot_number"], 
+              treatment_time: item["treatment_time"], 
+              datetime_used: dt_us, board_temperature: item["board_temperature"], 
+              min_co2_temperature: item["min_co2_temperature"], max_co2_temperature: item["max_co2_temperature"], 
+              average_co2_temperature: item["average_co2_temperature"], tank_tag_id: item["tank_tag_id"], 
+              tank_time_remaining: item["tank_time_remaining"] }
+            to_ins.push(usagestats_line)
+          end
+
+          #to_ins.inspect
+          curr_count = UsageStatistic.count
+          result = UsageStatistic.insert_all(to_ins)
+          after_count = UsageStatistic.count
+          if curr_count + to_ins.length == after_count
+            serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "true"})
+            render_success_update_errlist(serialization.as_json)
+          else
+            err_serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: "false"})
+            render_success_update_errlist(err_serialization.as_json)
+          end
+
+        end
+
+        desc 'invalid-ping: {invalid_ping_data} invalid ping packet received', http_codes: [
+          { code: RESPONSE_CODE[:success], message: I18n.t('messages.success') },
+          { code: RESPONSE_CODE[:bad_request], message: I18n.t('messages.failed') }
+        ]
+        params do
+          requires :invalid_ping_data, type: String, desc: 'invalid ping packet received'
+        end
+  
+        post "invalid-ping" do
+          if !headers["Host"].starts_with?('127.0.0.1')
+            render_error(RESPONSE_CODE[:bad_request], I18n.t('errors.not_authenticated'), meta = {response: ""})
+          end
+
+          invalid_packet = params[:invalid_ping_data]
+          
+          packet = InvalidPacket.where(packet: invalid_packet).first
+          if packet.nil?
+            tpacket = InvalidPacket.create(packet: params[:invalid_ping_data])
+            tpacket.packet = invalid_packet
+            if !tpacket.save
+              render_error(RESPONSE_CODE[:bad_request], I18n.t('messages.failed'), meta = {response: ""})
+              return
+            else
+              packet = tpacket
+            end
+          else
+            packet.updated_at = Time.now.utc
+            #packet.packet = invalid_packet
+            packet.save
+          end
+
+
+          serialization = DeviceinfoSerializer.new(nil, {ping_data: "", updated_at: "", response: packet.id.to_s})
+          render_success_connverify(serialization.as_json)
+        end
               
     end
   end

@@ -1,5 +1,14 @@
+##
+# This class contains All Dashboard related functions like rendering, controllers
+
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
+
+  ##
+  # function +content+ contains the layout for the dashboard page including links for differet elements
+  # User roles are used to display the appropriate menu items.
+  # The +if+ conditions specify the roles for displaying an item for user to act on  
+  # In the +columns+ block the dashboard items are displayed
 
   content title: proc { I18n.t("active_admin.dashboard") } do
     div class: "blank_slate_container", id: "dashboard_default_message" do
@@ -50,6 +59,10 @@ ActiveAdmin.register_page "Dashboard" do
     #   end
     # end
   end # content
+
+  ##
+  # This function used to customzie Controller actions for dashboard supported by ActiveAdmin 
+  # In the +index+ function, permissions allow display based on user roles
 
   controller do
     def index

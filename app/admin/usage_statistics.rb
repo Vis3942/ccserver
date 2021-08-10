@@ -54,6 +54,9 @@ ActiveAdmin.register UsageStatistic do
     ["usage_statistics.tank_time_remaining + 0",   order_clause.order].join(' ')
   end
 
+  ## 
+  # The +index+ block is used to show the recorded usage statistics of devices as a table
+  # All customizations to show the value in a user-friendly way would occur in this block
 
   index do
     selectable_column
@@ -99,6 +102,11 @@ ActiveAdmin.register UsageStatistic do
     end
   end
 
+  ##
+  # The +show+ block renders the view of an individual usage statistics item
+  # The individual elements displayed in the view are based on the values in the attributes_table
+  # if this function is missing, a default implementation from Active Admin will be used
+
   show do
     attributes_table do
       row :device_id do |usgstat|
@@ -130,10 +138,16 @@ ActiveAdmin.register UsageStatistic do
       row :tank_tag_id
       row :tank_time_remaining
       row :received_at
-  end
-  
     end
-  
+  end
+
+  ## 
+  # The +controller+ block includes functions scoped_collection and get_tip_string. 
+  # The function +scoped_collection+ is used to customize the collection extracted from the 
+  # database for the display
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Device
+  # table from the Tips table
+
   controller do
     def scoped_collection
       if !params["q"].nil?
@@ -162,5 +176,7 @@ ActiveAdmin.register UsageStatistic do
     end
     
   end
+
+
 
 end

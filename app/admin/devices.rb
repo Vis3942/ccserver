@@ -33,6 +33,10 @@ ActiveAdmin.register Device do
   # end
 
 
+  ##
+  # The +form+ function displays the individual device fields
+  # The actions on the fields of the Device depend on the user roles  
+
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
     f.inputs "Devices" do
@@ -75,6 +79,11 @@ ActiveAdmin.register Device do
     end
       f.actions
   end    
+
+
+  ## 
+  # The +index+ block is used to show the list of devices as a table
+  # All customizations to show the value in a user-friendly way would occur in this block
 
   index do
     selectable_column
@@ -171,6 +180,11 @@ ActiveAdmin.register Device do
 
   end
 
+  ##
+  # The +show+ block renders the view of an individual device item
+  # The individual elements displayed in the view are based on the values in the attributes_table
+  # if this function is missing, a default implementation from Active Admin will be used
+
   show do
     attributes_table do
       row :service_tag
@@ -196,6 +210,15 @@ ActiveAdmin.register Device do
       row :to
     end
   end
+
+
+  ## 
+  # The +controller+ block includes functions for creating a device entry in the database, 
+  # update device parameters in the database, and destroy a device element in the database
+  # The function +scoped_collection+ is used to customize the collection extracted from the 
+  # database for the display
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Device
+  # table from the Tips table
 
   controller do
 
@@ -273,6 +296,12 @@ ActiveAdmin.register Device do
   end
 
   batch_action :destroy, false
+
+  ##
+  # The +batch_action+ block sets up the 'show usage stats' menu 
+  # item in the batch action on the device table
+  # Select an item in the table, and click on the 'show usage stats' menu item
+  # which will take the user to the usage statistics for that particular selected device
 
   batch_action  "show usage stats" do |ids|
     # print ids.inspect

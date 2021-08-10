@@ -1,5 +1,9 @@
 ActiveAdmin.register InvalidPacket do
 
+  ##
+  # The +InvalidPacket+ resource uses the default views provided by ActiveAdmin.
+  # There are no customizations required for displaying the InvalidPacket details to the user
+
   # See permitted parameters documentation:
   # https://github.com/activeadmin/activeadmin/blob/master/docs/2-resource-customization.md#setting-up-strong-parameters
   #

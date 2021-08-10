@@ -17,6 +17,10 @@ ActiveAdmin.register Group do
   
   permit_params :account_qb_id, :name
 
+  ## 
+  # The +index+ block is used to show the list of groups as a table
+  # All customizations to show the value in a user-friendly way would occur in this block
+
   index do
     selectable_column
     id_column
@@ -34,6 +38,10 @@ ActiveAdmin.register Group do
 
   end
 
+
+  ##
+  # The +form+ function displays the individual fields of the Group element
+
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
     f.inputs "Groups" do
@@ -43,6 +51,11 @@ ActiveAdmin.register Group do
       f.actions
   end    
 
+
+  ## 
+  # The +controller+ block includes function get_tip_string, 
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Groups
+  # table from the Tips table
 
   controller do
 

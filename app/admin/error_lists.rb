@@ -21,6 +21,9 @@ ActiveAdmin.register ErrorList do
 
   #show :title => "Error Code List"
 
+  ## 
+  # The +index+ block is used to show the list of errors as a table
+
   index do
     selectable_column
     id_column
@@ -38,6 +41,10 @@ ActiveAdmin.register ErrorList do
     end
 
   end
+
+  ##
+  # The +form+ function displays the individual Error List fields
+  # The actions on the fields of the Error List depend on the user roles  
 
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
@@ -62,6 +69,10 @@ ActiveAdmin.register ErrorList do
     f.actions
   end    
 
+  ## 
+  # The +controller+ block get_tip_string function, 
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Error List
+  # table from the Tips table
 
   controller do
     def get_tip_string

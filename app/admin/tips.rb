@@ -14,7 +14,12 @@ ActiveAdmin.register Tip do
   #   permitted << :other if params[:action] == 'create' && current_user.admin?
   #   permitted
   # end
-  
+
+
+  ##
+  # The +form+ function displays the individual tips fields
+  # The default view provided by Active Admin is used in the form  
+
   form do |f|
     f.inputs do
       f.input :name

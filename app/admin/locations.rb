@@ -17,6 +17,9 @@ ActiveAdmin.register Location do
 
   permit_params :group_id, :shipto_qb_id, :shipto_qb_name, :shipto_qb_address_l1, :shipto_qb_address_l2, :shipto_qb_city, :shipto_qb_state, :shipto_qb_zip, :shipto_qb_country, :shipto_qb_contact, :shipto_qb_phone_number, :time_zone
 
+  ## 
+  # The +index+ block is used to show the list of locatons as a table
+  # Any required customizations to show the value in a user-friendly way would need to be changed in this block
 
   index do
     selectable_column
@@ -45,6 +48,10 @@ ActiveAdmin.register Location do
 
   end
 
+
+  ##
+  # The +form+ function displays the individual location fields
+
   form do |f| 
     f.semantic_errors  *f.object.errors.keys
 
@@ -64,6 +71,11 @@ ActiveAdmin.register Location do
     end
       f.actions
   end    
+
+    ## 
+  # The +controller+ block includes the function get_tip_string
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Location
+  # table from the Tips table
 
   controller do
     #layout 'active_admin'

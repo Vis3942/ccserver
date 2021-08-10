@@ -1,5 +1,11 @@
 module ActiveAdmin
     module Views
+
+      ##
+      # The class +Header+ in the +Views+ module ceates a custom clock in the header of the 
+      # web application that updates every second. The time displayed in the UTC time.
+      # The intended use of this clock is to be able to compare to time based entries in the table
+
       class Header < Component
   
 

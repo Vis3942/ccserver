@@ -32,6 +32,11 @@ ActiveAdmin.register Error do
     Location.all.map { |loc| [loc.shipto_qb_name, loc.id] }
   }
 
+
+  ## 
+  # The +index+ block is used to show the list of Device Errors as a table
+  # All customizations to show the value in a user-friendly way would occur in this block
+
   index :title => "Device Error List" do 
     selectable_column
     id_column
@@ -74,6 +79,11 @@ ActiveAdmin.register Error do
 
   end    
 
+  ##
+  # The +show+ block renders the view of an individual device error item
+  # The individual elements displayed in the view are based on the values in the attributes_table
+  # if this function is missing, a default implementation from Active Admin will be used
+
   show :title => "Device Error List" do
     attributes_table do
       row :device_id do |usgstat|
@@ -99,6 +109,12 @@ ActiveAdmin.register Error do
 
   end
 
+  ## 
+  # The +controller+ block includes functions get_tip_stting and scoped_collection. 
+  # The function +scoped_collection+ is used to customize the collection extracted from the 
+  # database for the display
+  # The function +get_tip_string+ is a custom action that retrives the relevant tip for the Device Error List
+  # table from the Tips table
 
   controller do
     def get_tip_string
